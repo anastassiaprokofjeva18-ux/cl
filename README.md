@@ -29,6 +29,16 @@ function resize() {
 resize();
 window.onresize = resize;
 
+// Фразы вокруг сердца
+const PHRASES = [
+    "I love you", "Seni seviyorum", "Te amo", "Je t'aime",
+    "Ich liebe dich", "Ti amo", "Eu te amo", "Я тебя люблю",
+    "사랑해", "愛してる", "我爱你", "मैं तुमसे प्यार करता हूँ",
+    "Σ' αγαπώ", "Ik hou van jou", "Jag älskar dig", "Kocham cię",
+    "ฉันรักเธอ", "Anh yêu em", "Aku cinta kamu", "Я тебе кохаю",
+];
+
+// Формула сердца
 function heart(t) {
     const x = 16 * Math.pow(Math.sin(t), 3);
     const y =
@@ -37,6 +47,18 @@ function heart(t) {
         2 * Math.cos(3*t) -
         Math.cos(4*t);
     return {x, y};
+}
+
+// Создаём объекты фраз
+let floatingTexts = [];
+for (let i = 0; i < PHRASES.length; i++) {
+    floatingTexts.push({
+        text: PHRASES[i],
+        angle: Math.random() * Math.PI * 2,
+        radius: 200 + Math.random() * 80,
+        speed: 0.005 + Math.random() * 0.01,
+        flash: 0
+    });
 }
 
 let time = 0;
@@ -48,7 +70,7 @@ function draw() {
     const cx = canvas.width / 2;
     const cy = canvas.height / 2 + 20;
 
-    // Glowing animated heart
+    // Рисуем сердце
     ctx.beginPath();
     for (let i = 0; i < 720; i++) {
         const t = i * Math.PI * 2 / 720;
@@ -66,12 +88,25 @@ function draw() {
     ctx.shadowBlur = 40;
     ctx.fill();
 
-    // Claudio text inside the heart
+    // Текст Claudio внутри сердца
     ctx.shadowBlur = 0;
     ctx.fillStyle = "white";
-    ctx.font = "bold 40px Arial";
+    ctx.font = "bold 48px Arial";
     ctx.textAlign = "center";
     ctx.fillText("Claudio", cx, cy);
+
+    // Анимация фраз вокруг сердца
+    ctx.font = "bold 22px Arial";
+    for (let obj of floatingTexts) {
+        obj.angle += obj.speed;
+        obj.flash = Math.abs(Math.sin(time * 0.02 + obj.angle));
+
+        const x = cx + Math.cos(obj.angle) * obj.radius;
+        const y = cy + Math.sin(obj.angle) * obj.radius;
+
+        ctx.fillStyle = `rgba(255,255,255,${0.4 + obj.flash * 0.6})`;
+        ctx.fillText(obj.text, x, y);
+    }
 
     time++;
     requestAnimationFrame(draw);
